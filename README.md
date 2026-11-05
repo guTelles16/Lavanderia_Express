@@ -70,12 +70,10 @@ Nunca versione senhas.
 
 ## Equipe
 
-| Integrante        | Responsabilidade             |
-|---|---|---|---|---|---|---|---|---|---|---|---|--|
-| Beatriz dos Anjos | Banco de Dados               |
-| Dhara Harumi      | Controle de testes TDD e BDD |
-| Gustavo Telles    | Java e telas                 |
-| Nícolas Ramos     | Testes e qualidade           |
+Integrantes e Responsabilidades:
+Beatriz dos Anjos - Banco de Dados
+Dhara Harumi - Controle de testes TDD e BDD
+Gustavo Telles - Java e telas
+Nícolas Ramos - Testes e qualidade
 
-
-**Orientador(a):** _Gratuliano_ · **Instituição:** _Universidade São Judas Tadeu_ · **Ano:** 2026
+**Orientador(a):** Gratuliano · **Instituição:** Universidade São Judas Tadeu · **Ano:** 2026
