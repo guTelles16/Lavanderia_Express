@@ -1,0 +1,15 @@
+# language: pt
+
+Funcionalidade: Cálculo do valor total do pedido de lavagem
+
+  Cenário: Calcular valor para Lavar e Passar
+    Dado que o cliente selecionou o serviço "Lavar e Passar"
+    E informou o peso de 5,0 kg
+    Quando o sistema calcula o valor do pedido
+    Então o valor total retornado deve ser 40,00 reais
+
+  Cenário: Calcular valor para Apenas Lavar
+    Dado que o cliente selecionou o serviço "Apenas Lavar"
+    E informou o peso de 10,0 kg
+    Quando o sistema calcula o valor do pedido
+    Então o valor total retornado deve ser 50,00 reais

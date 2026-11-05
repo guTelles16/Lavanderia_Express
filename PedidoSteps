@@ -1,0 +1,31 @@
+package steps;
+
+import model.Pedido;
+import io.cucumber.java.pt.*;
+import static org.junit.Assert.assertEquals;
+
+public class PedidoSteps {
+    private String servico;
+    private double peso;
+    private Pedido pedido;
+
+    @Dado("que o cliente selecionou o serviço {string}")
+    public void que_o_cliente_selecionou_o_servico(String servico) {
+        this.servico = servico;
+    }
+
+    @Dado("informou o peso de {double} kg")
+    public void informou_o_peso_de_kg(Double peso) {
+        this.peso = peso;
+    }
+
+    @Quando("o sistema calcula o valor do pedido")
+    public void o_sistema_calcula_o_valor_do_pedido() {
+        this.pedido = new Pedido("Cliente Teste", servico, peso);
+    }
+
+    @Então("o valor total retornado deve ser {double} reais")
+    public void o_valor_total_retornado_deve_ser_reais(Double valorEsperado) {
+        assertEquals(valorEsperado, pedido.getValorTotal(), 0.001);
+    }
+}
