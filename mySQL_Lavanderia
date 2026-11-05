@@ -1,0 +1,89 @@
+-- -----------------------------------------------------
+-- 1. DDL: Criação do Esquema e Tabelas
+-- -----------------------------------------------------
+CREATE DATABASE IF NOT EXISTS SistemaLavanderia;
+USE SistemaLavanderia;
+
+CREATE TABLE Clientes (
+    id_cliente INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL,
+    telefone VARCHAR(20) NOT NULL,
+    endereco VARCHAR(150),
+    data_cadastro DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE Servicos (
+    id_servico INT AUTO_INCREMENT PRIMARY KEY,
+    descricao VARCHAR(100) NOT NULL,
+    preco_base DECIMAL(10,2) NOT NULL
+);
+
+CREATE TABLE Pedidos (
+    id_pedido INT AUTO_INCREMENT PRIMARY KEY,
+    id_cliente INT NOT NULL,
+    data_recebimento DATETIME DEFAULT CURRENT_TIMESTAMP,
+    data_prevista_entrega DATE,
+    status_pedido VARCHAR(30) DEFAULT 'Pendente',
+    valor_total DECIMAL(10,2) DEFAULT 0.00,
+    CONSTRAINT fk_pedido_cliente FOREIGN KEY (id_cliente) REFERENCES Clientes(id_cliente)
+);
+
+CREATE TABLE Itens_Pedido (
+    id_item INT AUTO_INCREMENT PRIMARY KEY,
+    id_pedido INT NOT NULL,
+    id_servico INT NOT NULL,
+    quantidade INT NOT NULL,
+    preco_unitario DECIMAL(10,2) NOT NULL,
+    CONSTRAINT fk_item_pedido FOREIGN KEY (id_pedido) REFERENCES Pedidos(id_pedido) ON DELETE CASCADE,
+    CONSTRAINT fk_item_servico FOREIGN KEY (id_servico) REFERENCES Servicos(id_servico)
+);
+
+-- -----------------------------------------------------
+-- 2. DQL: Views para simplificar o SELECT no Java
+-- -----------------------------------------------------
+-- Esta View abstrai os JOINs para que o comando no Java seja apenas: 
+-- SELECT * FROM vw_detalhes_pedidos;
+CREATE VIEW vw_detalhes_pedidos AS
+SELECT 
+    p.id_pedido,
+    c.nome AS cliente,
+    c.telefone,
+    s.descricao AS servico,
+    i.quantidade,
+    i.preco_unitario,
+    (i.quantidade * i.preco_unitario) AS subtotal,
+    p.status_pedido,
+    p.data_recebimento
+FROM Pedidos p
+INNER JOIN Clientes c ON p.id_cliente = c.id_cliente
+INNER JOIN Itens_Pedido i ON p.id_pedido = i.id_pedido
+INNER JOIN Servicos s ON i.id_servico = s.id_servico;
+
+-- -----------------------------------------------------
+-- 3. DCL: Usuário de Aplicação (Segurança de Integração)
+-- -----------------------------------------------------
+-- Evita o uso do usuário 'root' no código-fonte Java
+CREATE USER IF NOT EXISTS 'app_lavanderia'@'localhost' IDENTIFIED BY 'senha_lavanderia123';
+GRANT ALL PRIVILEGES ON SistemaLavanderia.* TO 'app_lavanderia'@'localhost';
+FLUSH PRIVILEGES;
+
+-- -----------------------------------------------------
+-- 4. DML: Inserção de Massa de Dados (Seed/Mock Data)
+-- -----------------------------------------------------
+INSERT INTO Clientes (nome, telefone, endereco) VALUES 
+('Carlos Almeida', '11999998888', 'Rua das Flores, 123 - Centro'),
+('Marina Silva', '11988887777', 'Av. Paulista, 1500 - Bela Vista');
+
+INSERT INTO Servicos (descricao, preco_base) VALUES 
+('Lavagem a Seco - Terno', 45.00),
+('Lavagem Simples - Camisa', 15.00),
+('Passadoria - Vestido', 25.00);
+
+INSERT INTO Pedidos (id_cliente, data_prevista_entrega, status_pedido, valor_total) VALUES 
+(1, '2026-11-10', 'Pendente', 60.00),
+(2, '2026-11-08', 'Pronto', 25.00);
+
+INSERT INTO Itens_Pedido (id_pedido, id_servico, quantidade, preco_unitario) VALUES 
+(1, 1, 1, 45.00),
+(1, 2, 1, 15.00),
+(2, 3, 1, 25.00);
