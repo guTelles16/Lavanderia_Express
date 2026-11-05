@@ -78,4 +78,4 @@ Nunca versione senhas.
 | Nícolas Ramos     | Testes e qualidade           |
 
 
-**Orientador(a):** _Nome_ · **Instituição:** _Nome_ · **Ano:** 2026
+**Orientador(a):** _Gratuliano_ · **Instituição:** _Universidade São Judas Tadeu_ · **Ano:** 2026
