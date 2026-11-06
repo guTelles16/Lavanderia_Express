@@ -1,0 +1,74 @@
+CREATE DATABASE IF NOT EXISTS lavanderia_express;
+USE lavanderia_express;
+
+DROP TABLE IF EXISTS Pedido_Servico;
+DROP TABLE IF EXISTS Pedido;
+DROP TABLE IF EXISTS Servico;
+DROP TABLE IF EXISTS Cliente;
+
+
+CREATE TABLE Cliente (
+    ID INT AUTO_INCREMENT PRIMARY KEY,
+    Nome VARCHAR(100) NOT NULL,
+    Telefone VARCHAR(20) NOT NULL,
+    Endereco VARCHAR(255) NOT NULL
+);
+
+
+CREATE TABLE Servico (
+    ID INT AUTO_INCREMENT PRIMARY KEY,
+    Descricao VARCHAR(150) NOT NULL,
+    PrecoUnitario DECIMAL(10, 2) NOT NULL
+);
+
+
+CREATE TABLE Pedido (
+    ID INT AUTO_INCREMENT PRIMARY KEY,
+    ClienteID INT NOT NULL,
+    Data DATETIME DEFAULT CURRENT_TIMESTAMP,
+    ValorTotal DECIMAL(10, 2) NOT NULL,
+    Status VARCHAR(50) DEFAULT 'Pendente',
+    CONSTRAINT fk_pedido_cliente FOREIGN KEY (ClienteID) REFERENCES Cliente(ID)
+);
+
+
+CREATE TABLE Pedido_Servico (
+    PedidoID INT NOT NULL,
+    ServicoID INT NOT NULL,
+    Quantidade INT NOT NULL DEFAULT 1,
+    PRIMARY KEY (PedidoID, ServicoID),
+    CONSTRAINT fk_pedserv_pedido FOREIGN KEY (PedidoID) REFERENCES Pedido(ID),
+    CONSTRAINT fk_pedserv_servico FOREIGN KEY (ServicoID) REFERENCES Servico(ID)
+);
+
+
+
+INSERT INTO Cliente (Nome, Telefone, Endereco) VALUES 
+('Ana Souza', '(11) 98765-4321', 'Rua das Flores, 123'),
+('Carlos Lima', '(11) 91234-5678', 'Av. Paulista, 1000');
+
+INSERT INTO Servico (Descricao, PrecoUnitario) VALUES 
+('Lavagem de Peça Simples', 15.00),
+('Lavagem e Passagem de Terno', 45.00),
+('Lavagem de Edredom', 35.00);
+
+INSERT INTO Pedido (ClienteID, ValorTotal, Status) VALUES 
+(1, 60.00, 'Pendente');
+
+INSERT INTO Pedido_Servico (PedidoID, ServicoID, Quantidade) VALUES 
+(1, 1, 1), 
+(1, 2, 1); 
+
+
+
+SELECT '--- TABELA: CLIENTE ---' AS Info;
+SELECT * FROM Cliente;
+
+SELECT '--- TABELA: SERVICO ---' AS Info;
+SELECT * FROM Servico;
+
+SELECT '--- TABELA: PEDIDO ---' AS Info;
+SELECT * FROM Pedido;
+
+SELECT '--- TABELA: PEDIDO_SERVICO ---' AS Info;
+SELECT * FROM Pedido_Servico;
