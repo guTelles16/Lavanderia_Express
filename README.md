@@ -23,8 +23,6 @@ Status do pedido: `PENDENTE → LAVANDO → PRONTO → ENTREGUE`
 
 Telas em Java Swing, criadas com o GUI Builder do Apache NetBeans 31.
 
-![Painel principal](docs/img/painel-principal.png)
-
 O painel principal oferece **Novo Cliente**, **Consultar Ordens** e **Fechar Caixa**.
 
 ## Modelo de dados
@@ -59,14 +57,6 @@ Java 25 · Maven · Swing · MySQL + JDBC · JUnit (TDD) · Cucumber (BDD) · Ec
 ├── src/test/    # testes JUnit e cenários Cucumber (.feature)
 └── pom.xml
 ```
-
-## Como contribuir
-
-1. Crie uma branch por tarefa: `git checkout -b feature/nome-da-tarefa`
-2. Faça commits pequenos e descritivos (ex.: `feat: adiciona ClienteDAO`)
-3. Abra um Pull Request e peça revisão de outro integrante antes de mesclar na `main`
-
-Nunca versione senhas.
 
 ## Equipe
 
