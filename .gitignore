@@ -1,0 +1,12 @@
+# Build do Maven
+target/
+
+# Configurações locais do NetBeans
+nbproject/private/
+
+# Credenciais: nunca versionar
+src/main/resources/db.properties
+
+# Logs e temporários
+*.log
+*.tmp
