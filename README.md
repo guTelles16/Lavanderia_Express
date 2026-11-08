@@ -13,6 +13,7 @@ Projeto acadêmico de conclusão de semestre, com foco em **Garantia e Qualidade
 | RF01 | Cadastro rápido de novos clientes |
 | RF02 | Registro de ordens de serviço de lavagem |
 | RF03 | Consulta de status em tempo real |
+| RF04 | Autenticação de usuários (cadastro e login) |
 | RNF01 | Resposta de tela inferior a 2 segundos |
 | RNF02 | Cobertura de testes superior a 80% |
 | RNF03 | Banco relacional normalizado |
