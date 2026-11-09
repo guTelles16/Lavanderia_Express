@@ -30,29 +30,94 @@ public class TelaCliente extends javax.swing.JDialog {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jLabel1 = new javax.swing.JLabel();
+        pnlBusca = new javax.swing.JPanel();
+        lblBusca = new javax.swing.JLabel();
+        txtBusca = new javax.swing.JTextField();
+        btnBuscar = new javax.swing.JButton();
+        scrollTabela = new javax.swing.JScrollPane();
+        tblClientes = new javax.swing.JTable();
+        pnlEdicao = new javax.swing.JPanel();
+        lblMensagem = new javax.swing.JLabel();
+        pnlCampos = new javax.swing.JPanel();
+        lblNome = new javax.swing.JLabel();
+        txtNome = new javax.swing.JTextField();
+        lblTelefone = new javax.swing.JLabel();
+        txtTelefone = new javax.swing.JTextField();
+        lblEndereco = new javax.swing.JLabel();
+        txtEndereco = new javax.swing.JTextField();
+        pnlAcoes = new javax.swing.JPanel();
+        btnNovo = new javax.swing.JButton();
+        btnSalvar = new javax.swing.JButton();
+        btnExcluir = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        setTitle("Novo Cliente");
+        setTitle("Clientes");
 
-        jLabel1.setText("Cadastro de Clientes (em construção)");
+        pnlBusca.setBorder(javax.swing.BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        pnlBusca.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
 
-        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
-        getContentPane().setLayout(layout);
-        layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addGap(94, 94, 94)
-                .addComponent(jLabel1)
-                .addContainerGap(108, Short.MAX_VALUE))
-        );
-        layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addGap(135, 135, 135)
-                .addComponent(jLabel1)
-                .addContainerGap(149, Short.MAX_VALUE))
-        );
+        lblBusca.setText("Buscar (nome ou telefone):");
+        pnlBusca.add(lblBusca);
+
+        txtBusca.setColumns(20);
+        pnlBusca.add(txtBusca);
+
+        btnBuscar.setText("Buscar");
+        pnlBusca.add(btnBuscar);
+
+        getContentPane().add(pnlBusca, java.awt.BorderLayout.PAGE_START);
+
+        scrollTabela.setPreferredSize(new java.awt.Dimension(650, 220));
+
+        tblClientes.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null}
+            },
+            new String [] {
+                "Title 1", "Title 2", "Title 3", "Title 4"
+            }
+        ));
+        scrollTabela.setViewportView(tblClientes);
+
+        getContentPane().add(scrollTabela, java.awt.BorderLayout.CENTER);
+
+        pnlEdicao.setBorder(javax.swing.BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        pnlEdicao.setLayout(new java.awt.BorderLayout());
+
+        lblMensagem.setText(" ");
+        pnlEdicao.add(lblMensagem, java.awt.BorderLayout.CENTER);
+
+        pnlCampos.setLayout(new java.awt.GridLayout(3, 2, 10, 8));
+
+        lblNome.setText("Nome");
+        pnlCampos.add(lblNome);
+        pnlCampos.add(txtNome);
+
+        lblTelefone.setText("Telefone");
+        pnlCampos.add(lblTelefone);
+        pnlCampos.add(txtTelefone);
+
+        lblEndereco.setText("Endereço");
+        pnlCampos.add(lblEndereco);
+        pnlCampos.add(txtEndereco);
+
+        pnlEdicao.add(pnlCampos, java.awt.BorderLayout.PAGE_END);
+
+        btnNovo.setText("Novo");
+        pnlAcoes.add(btnNovo);
+
+        btnSalvar.setText("Salvar");
+        pnlAcoes.add(btnSalvar);
+
+        btnExcluir.setText("Excluir");
+        pnlAcoes.add(btnExcluir);
+
+        pnlEdicao.add(pnlAcoes, java.awt.BorderLayout.PAGE_START);
+
+        getContentPane().add(pnlEdicao, java.awt.BorderLayout.PAGE_END);
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
@@ -95,6 +160,24 @@ public class TelaCliente extends javax.swing.JDialog {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JLabel jLabel1;
+    private javax.swing.JButton btnBuscar;
+    private javax.swing.JButton btnExcluir;
+    private javax.swing.JButton btnNovo;
+    private javax.swing.JButton btnSalvar;
+    private javax.swing.JLabel lblBusca;
+    private javax.swing.JLabel lblEndereco;
+    private javax.swing.JLabel lblMensagem;
+    private javax.swing.JLabel lblNome;
+    private javax.swing.JLabel lblTelefone;
+    private javax.swing.JPanel pnlAcoes;
+    private javax.swing.JPanel pnlBusca;
+    private javax.swing.JPanel pnlCampos;
+    private javax.swing.JPanel pnlEdicao;
+    private javax.swing.JScrollPane scrollTabela;
+    private javax.swing.JTable tblClientes;
+    private javax.swing.JTextField txtBusca;
+    private javax.swing.JTextField txtEndereco;
+    private javax.swing.JTextField txtNome;
+    private javax.swing.JTextField txtTelefone;
     // End of variables declaration//GEN-END:variables
 }
