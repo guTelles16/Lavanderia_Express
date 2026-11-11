@@ -1,11 +1,9 @@
-CREATE DATABASE IF NOT EXISTS lavanderia_express;
+-- -----------------------------------------------------
+-- 1. DDL: Criação do Esquema e Tabelas
+-- -----------------------------------------------------
+DROP DATABASE IF EXISTS lavanderia_express;
+CREATE DATABASE lavanderia_express;
 USE lavanderia_express;
-
-DROP TABLE IF EXISTS Pedido_Servico;
-DROP TABLE IF EXISTS Pedido;
-DROP TABLE IF EXISTS Servico;
-DROP TABLE IF EXISTS Cliente;
-
 
 CREATE TABLE Cliente (
     ID INT AUTO_INCREMENT PRIMARY KEY,
@@ -14,35 +12,65 @@ CREATE TABLE Cliente (
     Endereco VARCHAR(255) NOT NULL
 );
 
-
 CREATE TABLE Servico (
     ID INT AUTO_INCREMENT PRIMARY KEY,
     Descricao VARCHAR(150) NOT NULL,
     PrecoUnitario DECIMAL(10, 2) NOT NULL
 );
 
-
 CREATE TABLE Pedido (
     ID INT AUTO_INCREMENT PRIMARY KEY,
     ClienteID INT NOT NULL,
     Data DATETIME DEFAULT CURRENT_TIMESTAMP,
-    ValorTotal DECIMAL(10, 2) NOT NULL,
+    DataPrevistaEntrega DATE,
     Status VARCHAR(50) DEFAULT 'Pendente',
+    ValorTotal DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
     CONSTRAINT fk_pedido_cliente FOREIGN KEY (ClienteID) REFERENCES Cliente(ID)
 );
 
-
+-- Alterado para ter uma chave primária própria (surrogate key) e 
+-- armazenar o preço unitário histórico do item no momento do pedido.
 CREATE TABLE Pedido_Servico (
+    ID INT AUTO_INCREMENT PRIMARY KEY,
     PedidoID INT NOT NULL,
     ServicoID INT NOT NULL,
     Quantidade INT NOT NULL DEFAULT 1,
-    PRIMARY KEY (PedidoID, ServicoID),
-    CONSTRAINT fk_pedserv_pedido FOREIGN KEY (PedidoID) REFERENCES Pedido(ID),
+    PrecoUnitario DECIMAL(10, 2) NOT NULL,
+    CONSTRAINT fk_pedserv_pedido FOREIGN KEY (PedidoID) REFERENCES Pedido(ID) ON DELETE CASCADE,
     CONSTRAINT fk_pedserv_servico FOREIGN KEY (ServicoID) REFERENCES Servico(ID)
 );
 
+-- -----------------------------------------------------
+-- 2. DQL: View para simplificar SELECTs no Java
+-- -----------------------------------------------------
+-- Evita a complexidade de múltiplos JOINs no código-fonte da aplicação
+CREATE VIEW vw_detalhes_pedidos AS
+SELECT 
+    p.ID AS id_pedido,
+    c.Nome AS cliente,
+    c.Telefone AS telefone,
+    s.Descricao AS servico,
+    ps.Quantidade AS quantidade,
+    ps.PrecoUnitario AS preco_unitario,
+    (ps.Quantidade * ps.PrecoUnitario) AS subtotal,
+    p.Status AS status_pedido,
+    p.Data AS data_recebimento
+FROM Pedido p
+INNER JOIN Cliente c ON p.ClienteID = c.ID
+INNER JOIN Pedido_Servico ps ON p.ID = ps.PedidoID
+INNER JOIN Servico s ON ps.ServicoID = s.ID;
 
+-- -----------------------------------------------------
+-- 3. DCL: Usuário de Aplicação (Segurança de Integração)
+-- -----------------------------------------------------
+-- Evita o uso do usuário 'root' no código Java
+CREATE USER IF NOT EXISTS 'app_express'@'localhost' IDENTIFIED BY 'senha_express123';
+GRANT ALL PRIVILEGES ON lavanderia_express.* TO 'app_express'@'localhost';
+FLUSH PRIVILEGES;
 
+-- -----------------------------------------------------
+-- 4. DML: Inserção de Massa de Dados (Seed/Mock Data)
+-- -----------------------------------------------------
 INSERT INTO Cliente (Nome, Telefone, Endereco) VALUES 
 ('Ana Souza', '(11) 98765-4321', 'Rua das Flores, 123'),
 ('Carlos Lima', '(11) 91234-5678', 'Av. Paulista, 1000');
@@ -52,23 +80,19 @@ INSERT INTO Servico (Descricao, PrecoUnitario) VALUES
 ('Lavagem e Passagem de Terno', 45.00),
 ('Lavagem de Edredom', 35.00);
 
-INSERT INTO Pedido (ClienteID, ValorTotal, Status) VALUES 
-(1, 60.00, 'Pendente');
+-- Pedidos com data prevista de entrega e valor total calculado
+INSERT INTO Pedido (ClienteID, DataPrevistaEntrega, Status, ValorTotal) VALUES 
+(1, '2026-11-15', 'Pendente', 60.00),
+(2, '2026-11-12', 'Pronto', 35.00);
 
-INSERT INTO Pedido_Servico (PedidoID, ServicoID, Quantidade) VALUES 
-(1, 1, 1), 
-(1, 2, 1); 
+-- Itens vinculados aos pedidos (com histórico de preço unitário)
+INSERT INTO Pedido_Servico (PedidoID, ServicoID, Quantidade, PrecoUnitario) VALUES 
+(1, 1, 1, 15.00), 
+(1, 2, 1, 45.00),
+(2, 3, 1, 35.00);
 
-
-
-SELECT '--- TABELA: CLIENTE ---' AS Info;
-SELECT * FROM Cliente;
-
-SELECT '--- TABELA: SERVICO ---' AS Info;
-SELECT * FROM Servico;
-
-SELECT '--- TABELA: PEDIDO ---' AS Info;
-SELECT * FROM Pedido;
-
-SELECT '--- TABELA: PEDIDO_SERVICO ---' AS Info;
-SELECT * FROM Pedido_Servico;
+-- -----------------------------------------------------
+-- 5. Consultas de Validação
+-- -----------------------------------------------------
+SELECT '--- TESTANDO A VIEW DE DETALHES ---' AS Info;
+SELECT * FROM vw_detalhes_pedidos;
