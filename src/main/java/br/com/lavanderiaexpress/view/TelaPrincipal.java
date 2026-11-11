@@ -41,6 +41,7 @@ public class TelaPrincipal extends javax.swing.JFrame {
         lblSubtitulo = new javax.swing.JLabel();
         pnlBotoes = new javax.swing.JPanel();
         btnNovoCliente = new javax.swing.JButton();
+        btnServicos = new javax.swing.JButton();
         btnConsultarOrdens = new javax.swing.JButton();
         btnFecharCaixa = new javax.swing.JButton();
         pnlRodape = new javax.swing.JPanel();
@@ -69,13 +70,19 @@ public class TelaPrincipal extends javax.swing.JFrame {
 
         pnlBotoes.setBorder(javax.swing.BorderFactory.createEmptyBorder(30, 30, 30, 30));
         pnlBotoes.setPreferredSize(new java.awt.Dimension(700, 180));
-        pnlBotoes.setLayout(new java.awt.GridLayout(1, 3, 20, 0));
+        pnlBotoes.setLayout(new java.awt.GridLayout(1, 2, 20, 0));
 
         btnNovoCliente.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
         btnNovoCliente.setText("Novo Cliente");
         btnNovoCliente.setToolTipText("Cadastrar um novo cliente");
         btnNovoCliente.addActionListener(this::btnNovoClienteActionPerformed);
         pnlBotoes.add(btnNovoCliente);
+
+        btnServicos.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
+        btnServicos.setText("Novo Serviço");
+        btnServicos.setToolTipText("Cadastrar um novo serviço");
+        btnServicos.addActionListener(this::btnServicosActionPerformed);
+        pnlBotoes.add(btnServicos);
 
         btnConsultarOrdens.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
         btnConsultarOrdens.setText("Consultar Ordens");
@@ -113,10 +120,15 @@ public class TelaPrincipal extends javax.swing.JFrame {
         new TelaCaixa(this, true).setVisible(true);
     }//GEN-LAST:event_btnFecharCaixaActionPerformed
 
+    private void btnServicosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnServicosActionPerformed
+        new TelaServico(this, true).setVisible(true);
+    }//GEN-LAST:event_btnServicosActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnConsultarOrdens;
     private javax.swing.JButton btnFecharCaixa;
     private javax.swing.JButton btnNovoCliente;
+    private javax.swing.JButton btnServicos;
     private javax.swing.JLabel lblRodape;
     private javax.swing.JLabel lblSubtitulo;
     private javax.swing.JLabel lblTitulo;

@@ -4,6 +4,13 @@
  */
 package br.com.lavanderiaexpress.view;
 
+import br.com.lavanderiaexpress.model.Cliente;
+import br.com.lavanderiaexpress.service.ClienteService;
+import java.sql.SQLException;
+import java.util.List;
+import javax.swing.JOptionPane;
+import javax.swing.table.DefaultTableModel;
+
 /**
  *
  * @author Gusta
@@ -11,6 +18,11 @@ package br.com.lavanderiaexpress.view;
 public class TelaCliente extends javax.swing.JDialog {
     
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(TelaCliente.class.getName());
+    
+    // Toda validação passa pelo Service
+    private final ClienteService service = new ClienteService();
+    private DefaultTableModel modelo;
+    private int idSelecionado = 0; // 0 = nenhum cliente selecionado
 
     /**
      * Creates new form TelaCliente
@@ -19,7 +31,68 @@ public class TelaCliente extends javax.swing.JDialog {
         super(parent, modal);
         initComponents();
         setLocationRelativeTo(parent); // abre centralizada sobre a janela principal
+        lblMensagem.setText(" ");
+        configurarTabela();
+        carregarTabela();
+        limparFormulario();
     }
+    
+    // Métodos de apoio
+    private void configurarTabela() {
+        modelo = new DefaultTableModel(new Object[]{"ID", "Nome", "Telefone", "Endereço"}, 0) {
+            @Override
+            public boolean isCellEditable(int linha, int coluna) {
+                return false; // A tabela só exibe; a edição é feita no formulário
+            }
+        };
+        tblClientes.setModel(modelo);
+        tblClientes.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+        tblClientes.getSelectionModel().addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) {
+                carregarSelecionado();
+            }
+        });
+    }
+    
+    // Clicar numa linha da tabela preenche o formulário com os dados do cliente
+    private void carregarTabela() {
+        try {
+            List<Cliente> lista = service.listar(txtBusca.getText());
+            modelo.setRowCount(0);
+            for (Cliente c : lista) {
+                modelo.addRow(new Object[]{c.id(), c.nome(), c.telefone(), c.endereco()});
+            }
+        } catch (SQLException e) {
+            mostrar("Não foi possível carregar os clientes.", true);
+        }
+    }
+    
+    private void carregarSelecionado() {
+        int linha = tblClientes.getSelectedRow();
+        if (linha < 0) {
+            return;
+        }
+        idSelecionado = (int) modelo.getValueAt(linha, 0);
+        txtNome.setText((String) modelo.getValueAt(linha, 1));
+        txtTelefone.setText((String) modelo.getValueAt(linha, 2));
+        txtEndereco.setText((String) modelo.getValueAt(linha, 3));
+        btnExcluir.setEnabled(true);
+    }
+    
+    private void limparFormulario() {
+        idSelecionado = 0;
+        txtNome.setText("");
+        txtTelefone.setText("");
+        txtEndereco.setText("");
+        tblClientes.clearSelection();
+        btnExcluir.setEnabled(false);
+        txtNome.requestFocusInWindow();
+    }
+    
+    private void mostrar(String texto, boolean erro) {
+        lblMensagem.setForeground(erro ? java.awt.Color.RED : new java.awt.Color(0, 128, 0));
+        lblMensagem.setText(texto);
+    } 
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -63,6 +136,7 @@ public class TelaCliente extends javax.swing.JDialog {
         pnlBusca.add(txtBusca);
 
         btnBuscar.setText("Buscar");
+        btnBuscar.addActionListener(this::btnBuscarActionPerformed);
         pnlBusca.add(btnBuscar);
 
         getContentPane().add(pnlBusca, java.awt.BorderLayout.PAGE_START);
@@ -98,6 +172,8 @@ public class TelaCliente extends javax.swing.JDialog {
 
         lblTelefone.setText("Telefone");
         pnlCampos.add(lblTelefone);
+
+        txtTelefone.setToolTipText("DDD + número");
         pnlCampos.add(txtTelefone);
 
         lblEndereco.setText("Endereço");
@@ -107,12 +183,15 @@ public class TelaCliente extends javax.swing.JDialog {
         pnlEdicao.add(pnlCampos, java.awt.BorderLayout.PAGE_END);
 
         btnNovo.setText("Novo");
+        btnNovo.addActionListener(this::btnNovoActionPerformed);
         pnlAcoes.add(btnNovo);
 
         btnSalvar.setText("Salvar");
+        btnSalvar.addActionListener(this::btnSalvarActionPerformed);
         pnlAcoes.add(btnSalvar);
 
         btnExcluir.setText("Excluir");
+        btnExcluir.addActionListener(this::btnExcluirActionPerformed);
         pnlAcoes.add(btnExcluir);
 
         pnlEdicao.add(pnlAcoes, java.awt.BorderLayout.PAGE_START);
@@ -121,6 +200,57 @@ public class TelaCliente extends javax.swing.JDialog {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void btnBuscarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBuscarActionPerformed
+        carregarTabela();
+    }//GEN-LAST:event_btnBuscarActionPerformed
+
+    // Limpa tudo e volta ao modo de cadastro
+    private void btnNovoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnNovoActionPerformed
+        limparFormulario();
+        mostrar(" ", false);
+    }//GEN-LAST:event_btnNovoActionPerformed
+
+    // "idSelecionado = 0" cadastra; qualquer outro valor atualiza o cliente
+    private void btnSalvarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSalvarActionPerformed
+        try {
+            if (idSelecionado == 0) {
+                service.cadastrar(txtNome.getText(), txtTelefone.getText(), txtEndereco.getText());
+                carregarTabela();
+                limparFormulario();
+                mostrar("Cliente cadastrado com sucesso.", false);
+            } else {
+                service.atualizar(idSelecionado, txtNome.getText(), txtTelefone.getText(), txtEndereco.getText());
+                carregarTabela();
+                limparFormulario();
+                mostrar("Cliente atualizado com sucesso.", false);
+            }
+        } catch (IllegalArgumentException e) {
+            mostrar(e.getMessage(), true);
+        } catch (SQLException e) {
+            mostrar("Não foi possível acessar o banco de dados.", true);
+        }
+    }//GEN-LAST:event_btnSalvarActionPerformed
+
+    // Clicar numa linha da tabela ativa o botão Excluir
+    private void btnExcluirActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnExcluirActionPerformed
+        int opcao = JOptionPane.showConfirmDialog(this,
+                "Excluir o cliente selecionado?", "Confirmar exclusão",
+                JOptionPane.YES_NO_OPTION);
+        if (opcao != JOptionPane.YES_OPTION) {
+            return;
+        }
+        try {
+            service.excluir(idSelecionado);
+            carregarTabela();
+            limparFormulario();
+            mostrar("Cliente excluido.", false);
+        } catch (IllegalArgumentException e) {
+            mostrar(e.getMessage(), true);
+        } catch (SQLException e) {
+            mostrar("Não foi possível acessar o banco de dados.", true);
+        }
+    }//GEN-LAST:event_btnExcluirActionPerformed
 
     /**
      * @param args the command line arguments

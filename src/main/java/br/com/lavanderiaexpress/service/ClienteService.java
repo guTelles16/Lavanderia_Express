@@ -39,7 +39,7 @@ public class ClienteService {
         }
     }
     
-    public void excluir (int id) throws SQLException {
+    public void excluir(int id) throws SQLException {
         if (id <= 0) {
             throw new IllegalArgumentException("Selecione um cliente.");
         }

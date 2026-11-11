@@ -41,7 +41,7 @@ public class ClienteDAO {
         }
     }
     
-    public void excluir (int id)throws SQLException {
+    public void excluir(int id) throws SQLException {
         String sql = "DELETE FROM cliente WHERE id_cliente = ?";
         try (Connection con = Conexao.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
