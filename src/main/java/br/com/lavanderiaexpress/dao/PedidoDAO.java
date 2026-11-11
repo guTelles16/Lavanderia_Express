@@ -25,7 +25,7 @@ public class PedidoDAO {
         
         String sqlPedido = "INSERT INTO pedido (cliente_id, valor_total) VALUES (?, ?)";
         String sqlItem = "INSERT INTO item_pedido "
-                       + "(pedido_id, servico_id, quantidade, preco_unitario "
+                       + "(pedido_id, servico_id, quantidade, preco_unitario) "
                        + "VALUES (?, ?, ?, ?)";
         
         try (Connection con = Conexao.getConnection()) {

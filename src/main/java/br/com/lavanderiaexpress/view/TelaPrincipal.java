@@ -5,6 +5,7 @@
 package br.com.lavanderiaexpress.view;
 
 import br.com.lavanderiaexpress.model.Usuario;
+import javax.swing.JOptionPane;
 
 /**
  *
@@ -42,8 +43,10 @@ public class TelaPrincipal extends javax.swing.JFrame {
         pnlBotoes = new javax.swing.JPanel();
         btnNovoCliente = new javax.swing.JButton();
         btnServicos = new javax.swing.JButton();
+        btnNovoPedido = new javax.swing.JButton();
         btnConsultarOrdens = new javax.swing.JButton();
         btnFecharCaixa = new javax.swing.JButton();
+        btnSair = new javax.swing.JButton();
         pnlRodape = new javax.swing.JPanel();
         lblRodape = new javax.swing.JLabel();
 
@@ -70,7 +73,7 @@ public class TelaPrincipal extends javax.swing.JFrame {
 
         pnlBotoes.setBorder(javax.swing.BorderFactory.createEmptyBorder(30, 30, 30, 30));
         pnlBotoes.setPreferredSize(new java.awt.Dimension(700, 180));
-        pnlBotoes.setLayout(new java.awt.GridLayout(1, 2, 20, 0));
+        pnlBotoes.setLayout(new java.awt.GridLayout(2, 3, 20, 0));
 
         btnNovoCliente.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
         btnNovoCliente.setText("Novo Cliente");
@@ -84,6 +87,11 @@ public class TelaPrincipal extends javax.swing.JFrame {
         btnServicos.addActionListener(this::btnServicosActionPerformed);
         pnlBotoes.add(btnServicos);
 
+        btnNovoPedido.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
+        btnNovoPedido.setText("Novo Pedido");
+        btnNovoPedido.addActionListener(this::btnNovoPedidoActionPerformed);
+        pnlBotoes.add(btnNovoPedido);
+
         btnConsultarOrdens.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
         btnConsultarOrdens.setText("Consultar Ordens");
         btnConsultarOrdens.setToolTipText("Registrar e consultar pedidos");
@@ -95,6 +103,11 @@ public class TelaPrincipal extends javax.swing.JFrame {
         btnFecharCaixa.setToolTipText("Ver o total do dia");
         btnFecharCaixa.addActionListener(this::btnFecharCaixaActionPerformed);
         pnlBotoes.add(btnFecharCaixa);
+
+        btnSair.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
+        btnSair.setText("Sair");
+        btnSair.addActionListener(this::btnSairActionPerformed);
+        pnlBotoes.add(btnSair);
 
         getContentPane().add(pnlBotoes, java.awt.BorderLayout.CENTER);
 
@@ -124,10 +137,27 @@ public class TelaPrincipal extends javax.swing.JFrame {
         new TelaServico(this, true).setVisible(true);
     }//GEN-LAST:event_btnServicosActionPerformed
 
+    private void btnNovoPedidoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnNovoPedidoActionPerformed
+        new TelaNovoPedido(this, true).setVisible(true);
+    }//GEN-LAST:event_btnNovoPedidoActionPerformed
+
+    private void btnSairActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSairActionPerformed
+        int opcao = JOptionPane.showConfirmDialog(this,
+                    "Deseja mesmo sair?", "Confirmar saída",
+                    JOptionPane.YES_NO_OPTION);
+        if (opcao != JOptionPane.YES_OPTION) {
+            return;
+        }
+        dispose();
+        new TelaLogin().setVisible(true);
+    }//GEN-LAST:event_btnSairActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnConsultarOrdens;
     private javax.swing.JButton btnFecharCaixa;
     private javax.swing.JButton btnNovoCliente;
+    private javax.swing.JButton btnNovoPedido;
+    private javax.swing.JButton btnSair;
     private javax.swing.JButton btnServicos;
     private javax.swing.JLabel lblRodape;
     private javax.swing.JLabel lblSubtitulo;
