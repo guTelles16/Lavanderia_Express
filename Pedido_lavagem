@@ -1,0 +1,16 @@
+# language: pt
+
+Funcionalidade: Pedido de lavagem
+  Cenário: Registrar nova ordem com sucesso
+    Dado que o cliente possui peças cadastradas
+    Quando o atendente fecha o pedido
+    Então a ordem é gerada como "Pendente"
+
+    Esquema do Cenário: Avançar status
+    Dado um pedido com status "<atual>"
+    Quando o atendente avança o status
+    Então o pedido passa a "<novo>"
+    Exemplos:
+      | atual      | novo       |
+      | Pendente   | Em lavagem |
+      | Em lavagem | Pronto     |
