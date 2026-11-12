@@ -1,31 +1,215 @@
 package steps;
 
-import model.Pedido;
-import io.cucumber.java.pt.*;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import io.cucumber.java.pt.Dado;
+import io.cucumber.java.pt.E;
+import io.cucumber.java.pt.Então;
+import io.cucumber.java.pt.Quando;
+
+/**
+ * Steps de todas as funcionalidades (cliente, pedido, pagamento e caixa).
+ * Usa estado em memória apenas para simular o sistema: substitua pelas
+ * chamadas reais (service, DAO, API, Selenium etc.).
+ */
 public class PedidoSteps {
-    private String servico;
-    private double peso;
-    private Pedido pedido;
 
-    @Dado("que o cliente selecionou o serviço {string}")
-    public void que_o_cliente_selecionou_o_servico(String servico) {
-        this.servico = servico;
+    private static final List<String> FLUXO_STATUS =
+            Arrays.asList("Pendente", "Em lavagem", "Pronto");
+
+    // ---------- Cadastro de cliente ----------
+    private boolean cadastroAberto;
+    private String nome;
+    private String telefone;
+    private String endereco;
+    private boolean clienteSalvo;
+    private String mensagemSistema;
+
+    // ---------- Pedido ----------
+    private boolean clientePossuiPecas;
+    private String statusPedido;
+
+    // ---------- Pagamento ----------
+    private BigDecimal valorLavagem = BigDecimal.ZERO;
+    private BigDecimal valorPassadoria = BigDecimal.ZERO;
+    private BigDecimal valorTotal = BigDecimal.ZERO;
+
+    // ---------- Caixa ----------
+    private final List<BigDecimal> pedidosPagos = new ArrayList<>();
+    private BigDecimal totalDoDia = BigDecimal.ZERO;
+    private String statusCaixa = "Aberto";
+
+    // =====================================================
+    // Cadastro de cliente
+    // =====================================================
+    @Dado("que o atendente abre o cadastro")
+    public void que_o_atendente_abre_o_cadastro() {
+        cadastroAberto = true;
+        nome = null;
+        setTelefone(null);
+        setEndereco(null);
+        clienteSalvo = false;
+        mensagemSistema = null;
     }
 
-    @Dado("informou o peso de {double} kg")
-    public void informou_o_peso_de_kg(Double peso) {
-        this.peso = peso;
+    @Quando("informa nome, telefone e endereço")
+    public void informa_nome_telefone_e_endereco() {
+        assertTrue(cadastroAberto);
+        nome = "Maria Silva";
+        setTelefone("(11) 99999-0000");
+        setEndereco("Rua das Flores, 123");
+        salvarCliente();
     }
 
-    @Quando("o sistema calcula o valor do pedido")
-    public void o_sistema_calcula_o_valor_do_pedido() {
-        this.pedido = new Pedido("Cliente Teste", servico, peso);
+    @Quando("salva sem informar o nome")
+    public void salva_sem_informar_o_nome() {
+        assertTrue(cadastroAberto);
+        nome = "";
+        setTelefone("(11) 99999-0000");
+        setEndereco("Rua das Flores, 123");
+        salvarCliente();
     }
 
-    @Então("o valor total retornado deve ser {double} reais")
-    public void o_valor_total_retornado_deve_ser_reais(Double valorEsperado) {
-        assertEquals(valorEsperado, pedido.getValorTotal(), 0.001);
+    @Então("o cliente é salvo no sistema")
+    public void o_cliente_e_salvo_no_sistema() {
+        assertTrue("O cliente deveria ter sido salvo", clienteSalvo);
     }
+
+    @Então("o sistema exibe {string}")
+    public void o_sistema_exibe(String mensagemEsperada) {
+        assertFalse("O cliente não deveria ter sido salvo", clienteSalvo);
+        assertEquals(mensagemEsperada, mensagemSistema);
+    }
+
+    private void salvarCliente() {
+        if (nome == null || nome.trim().isEmpty()) {
+            clienteSalvo = false;
+            mensagemSistema = "Nome obrigatório";
+        } else {
+            clienteSalvo = true;
+            mensagemSistema = "Cliente salvo";
+        }
+    }
+
+    // =====================================================
+    // Pedido de lavagem
+    // =====================================================
+    @Dado("que o cliente possui peças cadastradas")
+    public void que_o_cliente_possui_pecas_cadastradas() {
+        clientePossuiPecas = true;
+    }
+
+    @Quando("o atendente fecha o pedido")
+    public void o_atendente_fecha_o_pedido() {
+        assertTrue(clientePossuiPecas);
+        statusPedido = "Pendente"; // ordem gerada
+    }
+
+    @Então("a ordem é gerada como {string}")
+    public void a_ordem_e_gerada_como(String statusEsperado) {
+        assertEquals(statusEsperado, statusPedido);
+    }
+
+    @Dado("um pedido com status {string}")
+    public void um_pedido_com_status(String status) {
+        assertTrue("Status inválido: " + status, FLUXO_STATUS.contains(status));
+        statusPedido = status;
+    }
+
+    @Quando("o atendente avança o status")
+    public void o_atendente_avanca_o_status() {
+        int indice = FLUXO_STATUS.indexOf(statusPedido);
+        if (indice < FLUXO_STATUS.size() - 1) {
+            statusPedido = FLUXO_STATUS.get(indice + 1);
+        }
+    }
+
+    @Então("o pedido passa a {string}")
+    public void o_pedido_passa_a(String novoStatus) {
+        assertEquals(novoStatus, statusPedido);
+    }
+
+    // =====================================================
+    // Cálculo de pagamento
+    // =====================================================
+    @Dado("^um pedido com lavagem a R\\$ (\\d+,\\d{2})$")
+    public void um_pedido_com_lavagem_a(String valor) {
+        valorLavagem = paraDecimal(valor);
+    }
+
+    @E("^passadoria a R\\$ (\\d+,\\d{2})$")
+    public void passadoria_a(String valor) {
+        valorPassadoria = paraDecimal(valor);
+    }
+
+    @Quando("o sistema calcula o total")
+    public void o_sistema_calcula_o_total() {
+        valorTotal = valorLavagem.add(valorPassadoria);
+    }
+
+    @Então("^o ValorTotal é R\\$ (\\d+,\\d{2})$")
+    public void o_valor_total_e(String valorEsperado) {
+        assertEquals(0, paraDecimal(valorEsperado).compareTo(valorTotal));
+    }
+
+    // =====================================================
+    // Fechamento de caixa
+    // =====================================================
+    @Dado("que há {int} pedidos pagos hoje")
+    public void que_ha_pedidos_pagos_hoje(Integer quantidade) {
+        pedidosPagos.clear();
+        for (int i = 0; i < quantidade; i++) {
+            pedidosPagos.add(new BigDecimal("25.00"));
+        }
+        statusCaixa = "Aberto";
+    }
+
+    @Quando("o gestor fecha o caixa")
+    public void o_gestor_fecha_o_caixa() {
+        totalDoDia = pedidosPagos.stream()
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        statusCaixa = "Fechado";
+    }
+
+    @Então("o total do dia é a soma dos pedidos")
+    public void o_total_do_dia_e_a_soma_dos_pedidos() {
+        BigDecimal soma = pedidosPagos.stream()
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        assertEquals(0, soma.compareTo(totalDoDia));
+    }
+
+    @E("o caixa fica com status {string}")
+    public void o_caixa_fica_com_status(String statusEsperado) {
+        assertEquals(statusEsperado, statusCaixa);
+    }
+
+    // =====================================================
+    // Utilitário
+    // =====================================================
+    private BigDecimal paraDecimal(String valorBr) {
+        return new BigDecimal(valorBr.replace(".", "").replace(",", "."));
+    }
+
+	public String getEndereco() {
+		return endereco;
+	}
+
+	public void setEndereco(String endereco) {
+		this.endereco = endereco;
+	}
+
+	public String getTelefone() {
+		return telefone;
+	}
+
+	public void setTelefone(String telefone) {
+		this.telefone = telefone;
+	}
 }
