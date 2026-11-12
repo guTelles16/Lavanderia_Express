@@ -4,6 +4,15 @@
  */
 package br.com.lavanderiaexpress.view;
 
+import br.com.lavanderiaexpress.model.LinhaCaixa;
+import br.com.lavanderiaexpress.service.PedidoService;
+import java.sql.SQLException;
+import java.text.NumberFormat;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Locale;
+import javax.swing.table.DefaultTableModel;
+
 /**
  *
  * @author Gusta
@@ -11,6 +20,10 @@ package br.com.lavanderiaexpress.view;
 public class TelaCaixa extends javax.swing.JDialog {
     
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(TelaCaixa.class.getName());
+    
+    private final PedidoService service = new PedidoService();
+    private final NumberFormat moeda = NumberFormat.getCurrencyInstance(Locale.of("pt", "BR"));
+    private DefaultTableModel modelo;
 
     /**
      * Creates new form TelaCaixa
@@ -18,7 +31,48 @@ public class TelaCaixa extends javax.swing.JDialog {
     public TelaCaixa(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
+        lblMensagem.setText(" ");
+        lblTotal.setText(" ");
+        pack();
         setLocationRelativeTo(parent); // abre centralizada sobre a janela principal
+        txtData.setText(LocalDate.now().format(PedidoService.FORMATO_DATA));
+        configurarTabela();
+        consultar();
+    }
+    
+    private void configurarTabela() {
+        modelo = new DefaultTableModel(new Object[]{"Status", "Pedidos", "Valor"}, 0) {
+            @Override
+            public boolean isCellEditable(int linha, int coluna) {
+                return false;
+            }
+        };
+        tblCaixa.setModel(modelo);
+    }
+    
+    private void consultar() {
+        try {
+            LocalDate dia = PedidoService.lerData(txtData.getText());
+            List<LinhaCaixa> linhas = service.fecharCaixa(dia);
+            modelo.setRowCount(0);
+            for (LinhaCaixa l : linhas) {
+                modelo.addRow(new Object[]{l.status().rotulo(), l.quantidade(),
+                        moeda.format(l.total())});
+            }
+            lblTotal.setText("Total do dia: " + moeda.format(PedidoService.somarTotal(linhas))
+                    + " (" + PedidoService.somarQuantidade(linhas) + " pedidos)");
+            mostrar(linhas.isEmpty() ? "Nenhum pedido nesta data." : " ", false);
+        } catch (IllegalArgumentException e) {
+            mostrar(e.getMessage(), true);
+        } catch (SQLException e) {
+            logger.log(java.util.logging.Level.SEVERE, "Erro ao fechar caixa", e);
+            mostrar("Não foi possível consultar o caixa.", true);
+        }
+    }
+    
+    private void mostrar(String texto, boolean erro) {
+        lblMensagem.setForeground(erro ? java.awt.Color.RED : new java.awt.Color(0, 128, 0));
+        lblMensagem.setText(texto);
     }
 
     /**
@@ -30,32 +84,82 @@ public class TelaCaixa extends javax.swing.JDialog {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jLabel1 = new javax.swing.JLabel();
+        pnlBusca = new javax.swing.JPanel();
+        lblData = new javax.swing.JLabel();
+        txtData = new javax.swing.JTextField();
+        btnConsultar = new javax.swing.JButton();
+        scrollTabela = new javax.swing.JScrollPane();
+        tblCaixa = new javax.swing.JTable();
+        pnlRodape = new javax.swing.JPanel();
+        lblMensagem = new javax.swing.JLabel();
+        lblTotal = new javax.swing.JLabel();
+        pnlAcoes = new javax.swing.JPanel();
+        btnVoltar = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Fechar Caixa");
 
-        jLabel1.setText("Fechamento de Caixa (em construção)");
+        pnlBusca.setBorder(javax.swing.BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        pnlBusca.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
 
-        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
-        getContentPane().setLayout(layout);
-        layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addGap(95, 95, 95)
-                .addComponent(jLabel1)
-                .addContainerGap(103, Short.MAX_VALUE))
-        );
-        layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addGap(134, 134, 134)
-                .addComponent(jLabel1)
-                .addContainerGap(150, Short.MAX_VALUE))
-        );
+        lblData.setText("Data");
+        pnlBusca.add(lblData);
+
+        txtData.setColumns(10);
+        pnlBusca.add(txtData);
+
+        btnConsultar.setText("Consultar");
+        btnConsultar.addActionListener(this::btnConsultarActionPerformed);
+        pnlBusca.add(btnConsultar);
+
+        getContentPane().add(pnlBusca, java.awt.BorderLayout.PAGE_START);
+
+        scrollTabela.setPreferredSize(new java.awt.Dimension(520, 180));
+
+        tblCaixa.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null}
+            },
+            new String [] {
+                "Title 1", "Title 2", "Title 3", "Title 4"
+            }
+        ));
+        scrollTabela.setViewportView(tblCaixa);
+
+        getContentPane().add(scrollTabela, java.awt.BorderLayout.CENTER);
+
+        pnlRodape.setBorder(javax.swing.BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        pnlRodape.setLayout(new java.awt.BorderLayout());
+
+        lblMensagem.setText(" ");
+        pnlRodape.add(lblMensagem, java.awt.BorderLayout.CENTER);
+
+        lblTotal.setFont(new java.awt.Font("Segoe UI", 1, 16)); // NOI18N
+        lblTotal.setText("Total: R$ 0,00");
+        pnlRodape.add(lblTotal, java.awt.BorderLayout.PAGE_END);
+
+        pnlAcoes.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.RIGHT));
+        pnlRodape.add(pnlAcoes, java.awt.BorderLayout.PAGE_START);
+
+        btnVoltar.setText("Voltar");
+        btnVoltar.addActionListener(this::btnVoltarActionPerformed);
+        pnlRodape.add(btnVoltar, java.awt.BorderLayout.LINE_END);
+
+        getContentPane().add(pnlRodape, java.awt.BorderLayout.PAGE_END);
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void btnConsultarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnConsultarActionPerformed
+        consultar();
+    }//GEN-LAST:event_btnConsultarActionPerformed
+
+    private void btnVoltarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnVoltarActionPerformed
+        dispose();
+    }//GEN-LAST:event_btnVoltarActionPerformed
 
     /**
      * @param args the command line arguments
@@ -95,6 +199,16 @@ public class TelaCaixa extends javax.swing.JDialog {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JLabel jLabel1;
+    private javax.swing.JButton btnConsultar;
+    private javax.swing.JButton btnVoltar;
+    private javax.swing.JLabel lblData;
+    private javax.swing.JLabel lblMensagem;
+    private javax.swing.JLabel lblTotal;
+    private javax.swing.JPanel pnlAcoes;
+    private javax.swing.JPanel pnlBusca;
+    private javax.swing.JPanel pnlRodape;
+    private javax.swing.JScrollPane scrollTabela;
+    private javax.swing.JTable tblCaixa;
+    private javax.swing.JTextField txtData;
     // End of variables declaration//GEN-END:variables
 }

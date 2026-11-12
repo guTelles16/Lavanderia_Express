@@ -4,6 +4,18 @@
  */
 package br.com.lavanderiaexpress.view;
 
+import br.com.lavanderiaexpress.model.ItemPedido;
+import br.com.lavanderiaexpress.model.PedidoResumo;
+import br.com.lavanderiaexpress.model.StatusPedido;
+import br.com.lavanderiaexpress.service.PedidoService;
+import java.sql.SQLException;
+import java.text.NumberFormat;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.Locale;
+import javax.swing.JOptionPane;
+import javax.swing.table.DefaultTableModel;
+
 /**
  *
  * @author Gusta
@@ -11,6 +23,12 @@ package br.com.lavanderiaexpress.view;
 public class TelaOrdens extends javax.swing.JDialog {
     
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(TelaOrdens.class.getName());
+    
+    private final PedidoService service = new PedidoService();
+    private final NumberFormat moeda = NumberFormat.getCurrencyInstance(Locale.of("pt", "BR"));
+    private final DateTimeFormatter formatoData = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+    private List<PedidoResumo> pedidos = List.of();
+    private DefaultTableModel modelo;
 
     /**
      * Creates new form TelaOrdens
@@ -18,9 +36,62 @@ public class TelaOrdens extends javax.swing.JDialog {
     public TelaOrdens(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
+        lblMensagem.setText(" ");
+        pack();
         setLocationRelativeTo(parent); // abre centralizada sobre a janela principal
+        configurarTabela();
+        configurarFiltroStatus();
+        carregarTabela();
     }
-
+    
+    // Métodos de apoio
+    private void configurarTabela() {
+        modelo = new DefaultTableModel(
+                new Object[]{"Nº", "Cliente", "Data", "Status", "Total"}, 0) {
+            @Override
+            public boolean isCellEditable(int linha, int coluna) {
+                return false;
+            }
+        };
+        tblOrdens.setModel(modelo);
+        tblOrdens.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+    }
+    
+    private void configurarFiltroStatus() {
+        cmbStatus.removeAllItems();
+        cmbStatus.addItem("Todos");
+        for (StatusPedido s : StatusPedido.values()) {
+            cmbStatus.addItem(s.rotulo());
+        }
+    }
+    
+    private void carregarTabela() {
+        try {
+            int indice = cmbStatus.getSelectedIndex();
+            StatusPedido filtro = (indice <= 0) ? null : StatusPedido.values()[indice - 1];
+            pedidos = service.listar(txtBusca.getText(), filtro);
+            modelo.setRowCount(0);
+            for (PedidoResumo p : pedidos) {
+                modelo.addRow(new Object[]{p.id(), p.clienteNome(),
+                        p.data().format(formatoData), p.status().rotulo(),
+                        moeda.format(p.valorTotal())});
+            }
+        } catch (SQLException e) {
+            logger.log(java.util.logging.Level.SEVERE, "Erro ao listar pedidos", e);
+            mostrar("Não foi possível carregar os pedidos.", true);
+        }
+    }
+    
+    private PedidoResumo pedidoSelecionado() {
+        int linha = tblOrdens.getSelectedRow();
+        return (linha < 0) ? null : pedidos.get(linha);
+    }
+    
+    private void mostrar(String texto, boolean erro) {
+        lblMensagem.setForeground(erro ? java.awt.Color.RED : new java.awt.Color(0, 128, 0));
+        lblMensagem.setText(texto);
+    }
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -30,32 +101,134 @@ public class TelaOrdens extends javax.swing.JDialog {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jLabel1 = new javax.swing.JLabel();
+        pnlBusca = new javax.swing.JPanel();
+        lblBusca = new javax.swing.JLabel();
+        txtBusca = new javax.swing.JTextField();
+        lblStatus = new javax.swing.JLabel();
+        cmbStatus = new javax.swing.JComboBox<>();
+        btnBuscar = new javax.swing.JButton();
+        scrollTabela = new javax.swing.JScrollPane();
+        tblOrdens = new javax.swing.JTable();
+        pnlRodape = new javax.swing.JPanel();
+        lblMensagem = new javax.swing.JLabel();
+        pnlAcoes = new javax.swing.JPanel();
+        btnVerItens = new javax.swing.JButton();
+        btnAvancar = new javax.swing.JButton();
+        btnVoltar = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Consultar Ordens");
 
-        jLabel1.setText("Consulta de Ordens (em construção)");
+        pnlBusca.setBorder(javax.swing.BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        pnlBusca.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
 
-        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
-        getContentPane().setLayout(layout);
-        layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addGap(96, 96, 96)
-                .addComponent(jLabel1)
-                .addContainerGap(112, Short.MAX_VALUE))
-        );
-        layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addGap(131, 131, 131)
-                .addComponent(jLabel1)
-                .addContainerGap(153, Short.MAX_VALUE))
-        );
+        lblBusca.setText("Buscar (cliente ou n°):");
+        pnlBusca.add(lblBusca);
+
+        txtBusca.setColumns(18);
+        pnlBusca.add(txtBusca);
+
+        lblStatus.setText("Status");
+        pnlBusca.add(lblStatus);
+
+        cmbStatus.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        pnlBusca.add(cmbStatus);
+
+        btnBuscar.setText("Buscar");
+        btnBuscar.addActionListener(this::btnBuscarActionPerformed);
+        pnlBusca.add(btnBuscar);
+
+        getContentPane().add(pnlBusca, java.awt.BorderLayout.PAGE_START);
+
+        scrollTabela.setPreferredSize(new java.awt.Dimension(720, 260));
+
+        tblOrdens.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null}
+            },
+            new String [] {
+                "Title 1", "Title 2", "Title 3", "Title 4"
+            }
+        ));
+        scrollTabela.setViewportView(tblOrdens);
+
+        getContentPane().add(scrollTabela, java.awt.BorderLayout.CENTER);
+
+        pnlRodape.setBorder(javax.swing.BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        pnlRodape.setLayout(new java.awt.BorderLayout());
+
+        lblMensagem.setText(" ");
+        pnlRodape.add(lblMensagem, java.awt.BorderLayout.CENTER);
+
+        pnlAcoes.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.RIGHT));
+
+        btnVerItens.setText("Ver itens");
+        btnVerItens.addActionListener(this::btnVerItensActionPerformed);
+        pnlAcoes.add(btnVerItens);
+
+        btnAvancar.setText("Avançar status");
+        btnAvancar.addActionListener(this::btnAvancarActionPerformed);
+        pnlAcoes.add(btnAvancar);
+
+        btnVoltar.setText("Voltar");
+        btnVoltar.addActionListener(this::btnVoltarActionPerformed);
+        pnlAcoes.add(btnVoltar);
+
+        pnlRodape.add(pnlAcoes, java.awt.BorderLayout.PAGE_END);
+
+        getContentPane().add(pnlRodape, java.awt.BorderLayout.PAGE_END);
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void btnBuscarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBuscarActionPerformed
+        carregarTabela();
+        mostrar(pedidos.isEmpty() ? "Nenhum pedido encontrado." : " ", false);
+    }//GEN-LAST:event_btnBuscarActionPerformed
+
+    private void btnVerItensActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnVerItensActionPerformed
+        PedidoResumo p = pedidoSelecionado();
+        if (p == null) {
+            mostrar("Selecione um pedido.", true);
+            return;
+        }
+        try {
+            StringBuilder sb = new StringBuilder();
+            for (ItemPedido i : service.itens(p.id())) {
+                sb.append(i.quantidade()).append("x ").append(i.descricao())
+                   .append(" - ").append(moeda.format(i.subtotal())).append("\n");
+            }
+            sb.append("\nTotal: ").append(moeda.format(p.valorTotal()));
+            JOptionPane.showMessageDialog(this, sb.toString(),
+                    "Pedido nº " + p.id() + " - " + p.clienteNome(),
+                    JOptionPane.INFORMATION_MESSAGE);
+        } catch (SQLException e) {
+            logger.log(java.util.logging.Level.SEVERE, "Erro ao buscar itens", e);
+            mostrar("Não foi possível carregar os itens.", true);
+        }
+    }//GEN-LAST:event_btnVerItensActionPerformed
+
+    private void btnAvancarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAvancarActionPerformed
+        PedidoResumo p = pedidoSelecionado();
+        try {
+            service.avancarStatus(p);
+            carregarTabela();
+            mostrar("Status do pedido nº " + p.id() + " atualizado.", false);
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            mostrar(e.getMessage(), true);
+            carregarTabela();
+        } catch (SQLException e) {
+            logger.log(java.util.logging.Level.SEVERE, "Erro ao atualizar status", e);
+            mostrar("Não foi possível atualizar o status.", true);
+        }
+    }//GEN-LAST:event_btnAvancarActionPerformed
+
+    private void btnVoltarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnVoltarActionPerformed
+        dispose();
+    }//GEN-LAST:event_btnVoltarActionPerformed
 
     /**
      * @param args the command line arguments
@@ -95,6 +268,19 @@ public class TelaOrdens extends javax.swing.JDialog {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JLabel jLabel1;
+    private javax.swing.JButton btnAvancar;
+    private javax.swing.JButton btnBuscar;
+    private javax.swing.JButton btnVerItens;
+    private javax.swing.JButton btnVoltar;
+    private javax.swing.JComboBox<String> cmbStatus;
+    private javax.swing.JLabel lblBusca;
+    private javax.swing.JLabel lblMensagem;
+    private javax.swing.JLabel lblStatus;
+    private javax.swing.JPanel pnlAcoes;
+    private javax.swing.JPanel pnlBusca;
+    private javax.swing.JPanel pnlRodape;
+    private javax.swing.JScrollPane scrollTabela;
+    private javax.swing.JTable tblOrdens;
+    private javax.swing.JTextField txtBusca;
     // End of variables declaration//GEN-END:variables
 }
