@@ -1,1 +1,12 @@
+# language: pt
 
+Funcionalidade: Cadastro de cliente
+  Cenário: Cadastrar cliente com sucesso
+    Dado que o atendente abre o cadastro
+    Quando informa nome, telefone e endereço
+    Então o cliente é salvo no sistema
+
+  Cenário: Bloquear cadastro sem nome
+    Dado que o atendente abre o cadastro
+    Quando salva sem informar o nome
+    Então o sistema exibe "Nome obrigatório"
