@@ -1,0 +1,8 @@
+# language: pt
+
+Funcionalidade: Fechamento de caixa
+  Cenário: Fechar o caixa do dia
+    Dado que há 3 pedidos pagos hoje
+    Quando o gestor fecha o caixa
+    Então o total do dia é a soma dos pedidos
+    E o caixa fica com status "Fechado"
